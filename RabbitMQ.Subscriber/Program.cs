@@ -13,11 +13,21 @@ internal class Program
         var channel = connection.CreateModel();
         channel.BasicQos(0, 5, false);
 
-        //Notes: Eğer okuma işleminde bu satır silinir ise, publisher'da böyle bir kuyruk yok ise hata alınır. Fakat silinmemesi durumunda böyle bir kuyruk yok ise en baştan oluşturulacağı için hata alınmaz.
-        channel.QueueDeclare("hello-queue", true, false, false);
+        //Kuyruğa göndericeğimiz için aynı isimlendirmeleri kullanalım. Random olmasın, kuyruk kalıcı olacak.
+        //var randomQueueName = channel.QueueDeclare().QueueName;
+        var randomQueueName = "log-database-save";
+
+        //Eğer gönderilen mesajları (logları) kalıcı hale getirmek istiyorsak, bir kuyruk oluşturmamız gerek;
+        channel.QueueDeclare(randomQueueName, true, false, false);
+
+        //İlgili subscriber kapandığı taktirde kuyruğun sonlanması (silinmesi gibi düşünülebilir) için kuyruğu buradan kaldırıyoruz.
+        channel.QueueBind(randomQueueName, "logs-fanout", "", null);
 
         var consumer = new EventingBasicConsumer(channel);
-        channel.BasicConsume("hello-queue", false, consumer);
+        channel.BasicConsume(randomQueueName, false, consumer);
+
+        Console.WriteLine("Loglar dinlenmeye başlanıldı..");
+
         consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
         {
             var message = Encoding.UTF8.GetString(e.Body.ToArray());

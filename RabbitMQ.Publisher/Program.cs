@@ -10,15 +10,16 @@ internal class Program
 
         using var connection = conFactory.CreateConnection();
         var channel = connection.CreateModel();
-        channel.QueueDeclare("hello-queue", true, false, false);
+
+        channel.ExchangeDeclare("logs-fanout", type: ExchangeType.Fanout, durable: true);
 
         Enumerable.Range(1, 50).ToList().ForEach(x =>
         {
-            string message = $"Message: {x}";
+            string message = $"Logs: {x}";
             var messageBody = Encoding.UTF8.GetBytes(message);
 
-            //Herhangi bir Exchange belirtilmez ise routKey olaraktan channel'da oluşturulmuş olan kanal verilmelidir.
-            channel.BasicPublish(string.Empty, "hello-queue", null, messageBody);
+            //Artık elimizde bir exchange ismi olduğundan, Publish işleminde bu exchange ismi verilmeli.
+            channel.BasicPublish("logs-fanout", "", null, messageBody);
 
             Console.WriteLine($"{x}.mesajınız gönderilmiştir.");
         });
