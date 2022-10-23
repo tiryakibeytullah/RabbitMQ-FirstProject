@@ -11,20 +11,11 @@ internal class Program
 
         var connection = conFactory.CreateConnection();
         var channel = connection.CreateModel();
-        channel.BasicQos(0, 5, false);
-
-        //Kuyruğa göndericeğimiz için aynı isimlendirmeleri kullanalım. Random olmasın, kuyruk kalıcı olacak.
-        //var randomQueueName = channel.QueueDeclare().QueueName;
-        var randomQueueName = "log-database-save";
-
-        //Eğer gönderilen mesajları (logları) kalıcı hale getirmek istiyorsak, bir kuyruk oluşturmamız gerek;
-        channel.QueueDeclare(randomQueueName, true, false, false);
-
-        //İlgili subscriber kapandığı taktirde kuyruğun sonlanması (silinmesi gibi düşünülebilir) için kuyruğu buradan kaldırıyoruz.
-        channel.QueueBind(randomQueueName, "logs-fanout", "", null);
+        channel.BasicQos(0, 1, false);
 
         var consumer = new EventingBasicConsumer(channel);
-        channel.BasicConsume(randomQueueName, false, consumer);
+        var queueName = "direct-queue-Critical";
+        channel.BasicConsume(queueName, false, consumer);
 
         Console.WriteLine("Loglar dinlenmeye başlanıldı..");
 
@@ -34,6 +25,8 @@ internal class Program
 
             Thread.Sleep(1000);
             Console.WriteLine($"Gelen mesaj: {message}");
+            //File.AppendAllText("log-critical.txt", message + "\n");
+
             channel.BasicAck(e.DeliveryTag, false);
         };
 
