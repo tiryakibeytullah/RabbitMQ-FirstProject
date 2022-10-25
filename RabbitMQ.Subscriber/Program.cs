@@ -11,14 +11,19 @@ internal class Program
 
         var connection = conFactory.CreateConnection();
         var channel = connection.CreateModel();
+        //İlk olarak subscriber çalıştırılması durumunda, header-exchange olmayacağından sebep burada hata alınır. Bunun önüne geçilmesi için eğer yok ise bu alanda tekrardan oluşturma işlemi gerçekleştirilmiştir.
+        channel.ExchangeDeclare("header-exchange", type: ExchangeType.Headers, durable: true);
         channel.BasicQos(0, 1, false);
 
         var consumer = new EventingBasicConsumer(channel);
         var queueName = channel.QueueDeclare().QueueName;
-        //var routeKey = "*.Error.*"; ////Ortasında Error geçen loglar
-        //var routeKey = "*.*.Warning"; ////Sonunda Warning geçen loglar
-        var routeKey = "Info.#"; ////Başında Info geçen loglar
-        channel.QueueBind(queueName, "logs-topic", routeKey);
+        Dictionary<string, object> headers = new();
+        headers.Add("format", "pdf");
+        headers.Add("shape", "A4");
+        headers.Add("x-match", "all"); //all değeri alındığında mutlaka tüm key value değerleri eşlemesi gerekir.
+        //headers.Add("x-match", "any"); ////any değeri alındığında bir adet key value değeri eşlemesi yeterli.
+
+        channel.QueueBind(queueName, "header-exchange", String.Empty, headers);
         channel.BasicConsume(queueName, false, consumer);
 
         Console.WriteLine("Loglar dinlenmeye başlanıldı..");
