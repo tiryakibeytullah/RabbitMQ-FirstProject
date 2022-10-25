@@ -8,7 +8,7 @@ internal class Program
         var conFactory = new ConnectionFactory();
         conFactory.Uri = new Uri("amqps://snahhpmk:oN7FJS_T4LkCBXcZu_pIj0_57DB4PNd5@hawk.rmq.cloudamqp.com/snahhpmk");
 
-        using var connection = conFactory.CreateConnection();
+        using var connection = conFactory.CreateConnection(); 
         var channel = connection.CreateModel();
 
         channel.ExchangeDeclare("logs-topic", type: ExchangeType.Topic, durable: true);
