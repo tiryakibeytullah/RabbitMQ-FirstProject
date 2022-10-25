@@ -1,6 +1,8 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Shared;
 using System.Text;
+using System.Text.Json;
 
 internal class Program
 {
@@ -31,9 +33,10 @@ internal class Program
         consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
         {
             var message = Encoding.UTF8.GetString(e.Body.ToArray());
+            var getProduct = JsonSerializer.Deserialize<Product>(message);
 
             Thread.Sleep(1000);
-            Console.WriteLine($"Gelen mesaj: {message}");
+            Console.WriteLine($"Gelen mesaj: Id: {getProduct.Id} - Name: {getProduct.Name} - Stock: {getProduct.Stock} - Price: {getProduct.Price}");
             channel.BasicAck(e.DeliveryTag, false);
         };
 

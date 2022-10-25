@@ -1,5 +1,7 @@
 ﻿using RabbitMQ.Client;
+using Shared;
 using System.Text;
+using System.Text.Json;
 
 internal class Program
 {
@@ -21,7 +23,10 @@ internal class Program
         properties.Headers = headers;
         properties.Persistent = true; //True: Mesajlarımız kalıcı hale gelir. 
 
-        channel.BasicPublish("header-exchange", String.Empty, properties, Encoding.UTF8.GetBytes("Header mesajı"));
+        var product = new Product() { Id = 1, Name = "Defter", Price = 31, Stock = 100 };
+        var productJsonString = JsonSerializer.Serialize(product);
+
+        channel.BasicPublish("header-exchange", String.Empty, properties, Encoding.UTF8.GetBytes(productJsonString));
 
         Console.WriteLine("Header mesajınız gönderilmiştir.");
 
