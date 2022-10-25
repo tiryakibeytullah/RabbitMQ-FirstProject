@@ -14,7 +14,11 @@ internal class Program
         channel.BasicQos(0, 1, false);
 
         var consumer = new EventingBasicConsumer(channel);
-        var queueName = "direct-queue-Critical";
+        var queueName = channel.QueueDeclare().QueueName;
+        //var routeKey = "*.Error.*"; ////Ortasında Error geçen loglar
+        //var routeKey = "*.*.Warning"; ////Sonunda Warning geçen loglar
+        var routeKey = "Info.#"; ////Başında Info geçen loglar
+        channel.QueueBind(queueName, "logs-topic", routeKey);
         channel.BasicConsume(queueName, false, consumer);
 
         Console.WriteLine("Loglar dinlenmeye başlanıldı..");
@@ -25,8 +29,6 @@ internal class Program
 
             Thread.Sleep(1000);
             Console.WriteLine($"Gelen mesaj: {message}");
-            //File.AppendAllText("log-critical.txt", message + "\n");
-
             channel.BasicAck(e.DeliveryTag, false);
         };
 

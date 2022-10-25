@@ -11,26 +11,21 @@ internal class Program
         using var connection = conFactory.CreateConnection();
         var channel = connection.CreateModel();
 
-        channel.ExchangeDeclare("logs-direct", type: ExchangeType.Direct, durable: true);
-
-        Enum.GetNames(typeof(LogNames)).ToList().ForEach(x =>
-        {
-            var routeKey = $"route-{x}";
-            var queueName = $"direct-queue-{x}";
-            channel.QueueDeclare(queueName, true, false, false);
-            channel.QueueBind(queueName, "logs-direct", routeKey, null);
-        });
+        channel.ExchangeDeclare("logs-topic", type: ExchangeType.Topic, durable: true);
 
         Enumerable.Range(1, 50).ToList().ForEach(x =>
         {
-            //Rastgele log tipi seçilir.
-            LogNames log = (LogNames)new Random().Next(1, 5);
-            string message = $"log-type: {log}";
+            Random rnd = new Random();
+            LogNames firstLog = (LogNames)rnd.Next(1, 5);
+            LogNames secondLog = (LogNames)rnd.Next(1, 5);
+            LogNames thirdLog = (LogNames)rnd.Next(1, 5);
+
+            var routeKey = $"{firstLog}.{secondLog}.{thirdLog}";
+            string message = $"log-type: {firstLog}-{secondLog}-{thirdLog}";
             var messageBody = Encoding.UTF8.GetBytes(message);
-            var routeKey = $"route-{log}";
 
             //Artık elimizde bir exchange ismi olduğundan, Publish işleminde bu exchange ismi verilmeli.
-            channel.BasicPublish("logs-direct", routeKey, null, messageBody);
+            channel.BasicPublish("logs-topic", routeKey, null, messageBody);
 
             Console.WriteLine($"Log gönderilmiştir: {message}");
         });
