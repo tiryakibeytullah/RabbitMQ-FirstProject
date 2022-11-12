@@ -53,7 +53,7 @@ namespace RabbitMQWeb.WorkToPdf.Controllers
                 {
                     using (var channel = connection.CreateModel())
                     {
-                        channel.ExchangeDeclare(exchangeName, ExchangeType.Direct, true, false, null);
+                        channel.ExchangeDeclare(exchangeName, ExchangeType.Direct, true, false, null); 
                         channel.QueueDeclare(queueName, true, false, false, null);
                         channel.QueueBind(queueName, exchangeName, routingKeyName);
 
