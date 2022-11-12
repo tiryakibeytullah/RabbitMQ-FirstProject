@@ -1,0 +1,25 @@
+﻿@using RabbitMQWeb.WorkToPdf.Models
+@model WordToPdf
+@{
+    ViewData["Title"] = "ConvertWordToPdf";
+}
+
+<h1 class="text-center">Convert Word To Pdf</h1>
+
+<div class="container col-md-6">
+    <div class="container-fluid">
+        <form asp-action="ConvertWordToPdf" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Email address</label>
+                <input asp-for="Email" type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="WordFile" class="form-label">Word File</label>
+                <input asp-for="WordFile" class="form-control" type="file">
+            </div>
+            <button type="submit" class="btn btn-primary">Convert Pdf</button>
+        </form>
+    </div>
+</div>
+
